@@ -5,40 +5,50 @@
 // and injected into the same or different pages.
 
 (() => {
+  const hostName = "http://meow1.csie.ntu.edu.tw:8888"
   let currentNo = "";
   let currentKeywords = [];
   let currentSimilarJudgements = [];
   let currentOutcome;
-  let currentMetaContent;
 
-  // const fetchBookmarks = () => {
-  //   return new Promise((resolve) => {
-  //     chrome.storage.sync.get([currentVideo], (obj) => {
-  //       resolve(obj[currentVideo] ? JSON.parse(obj[currentVideo]) : []);
-  //     });
-  //   });
-  // };
+  const newJudgementLoadedWrapper = (evt) => {
 
-  // const addNewBookmarkEventHandler = async () => {
-  //   const currentTime = youtubePlayer.currentTime;
-  //   const newBookmark = {
-  //     time: currentTime,
-  //     desc: "Bookmark at " + getTime(currentTime),
-  //   };
+    const newJudgementLoaded = async () => {
+      if (document.getElementsByClassName("document__meta-content")[0]) {
+        clearInterval(jsInitChecktimer);
 
-  //   currentVideoBookmarks = await fetchBookmarks();
+        // Get current judgement id (example format "【裁判字號】108,台上大,2470")
+        // @ts-ignore
+        currentNo = document.getElementsByClassName("document__meta-content")[0].firstChild.innerText.split(" ")[0].substring(6);
+        console.log("judgement id: " + currentNo);
 
-  //   chrome.storage.sync.set({
-  //     [currentVideo]: JSON.stringify([...currentVideoBookmarks, newBookmark].sort((a, b) => a.time - b.time))
-  //   });
-  // };
+        const res = await fetch(`${hostName}/judgement/${currentNo}`);
+        const data = await res.json();
+        console.log("judgement info: ", data);
 
-  const newJudgementLoaded = () => {
-    console.log(document);
-    console.log(document.title);
-    currentMetaContent = document.getElementsByClassName("document__meta-content")[0];
-    console.log(currentMetaContent);
-  };
+        currentKeywords = data.output.keywords.keywords;
+        currentSimilarJudgements = data.output.similar_judgements;
+        currentOutcome = data.output.outcome === 3 ? "Unknown"
+          : data.output.outcome === 2 ? "Partial Win"
+            : data.output.outcome === 1 ? "Win" : "Lose";
+
+        console.log("current keywords: ", currentKeywords);
+        console.log("current similar judgements: ", currentSimilarJudgements);
+        console.log("current outcome: ", currentOutcome);
+
+        // @ts-ignore
+        chrome.storage.sync.set({
+          ["currentNo"]: currentNo,
+        })
+        // @ts-ignore
+        chrome.storage.sync.set({
+          [currentNo]: JSON.stringify(data)
+        });
+      }
+    };
+
+    var jsInitChecktimer = setInterval(newJudgementLoaded, 100);
+  }
 
   // @ts-ignore
   chrome.runtime.onMessage.addListener((obj, sender, response) => {
@@ -46,19 +56,10 @@
 
     if (type === "NEW") {
       console.log("on message: NEW");
-      newJudgementLoaded();
+      newJudgementLoadedWrapper();
     }
-    // else if (type === "PLAY") {
-    //   youtubePlayer.currentTime = value;
-    // } else if (type === "DELETE") {
-    //   currentVideoBookmarks = currentVideoBookmarks.filter((b) => b.time != value);
-    //   chrome.storage.sync.set({ [currentVideo]: JSON.stringify(currentVideoBookmarks) });
-
-    //   response(currentVideoBookmarks);
-    // }
   });
 
-  console.log("Run it after 10 seconds");
-  setTimeout(() => { newJudgementLoaded() }, 10);
+  window.addEventListener("load", newJudgementLoadedWrapper, false);
 })();
 

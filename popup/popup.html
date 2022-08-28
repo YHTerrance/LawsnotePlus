@@ -1,118 +1,78 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="stylesheet" href="../styles/popup.css" />
-    <script src="../styles/tailwind.js"></script>
-    <script type="module" src="./popup.js"></script>
-    <title>LawsnotePlus: popup</title>
-  </head>
 
-  <body>
-    <div class="container">
-      <header class="text-lg text-white flex bg-indigo-800 p-4 justify-between">
-        <h1 class="font-bold">LawsnotePlus</h1>
-        <!-- TODO: Add list functionality -->
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          class="text-white w-6 h-6"
-          fill="currentColor"
-          class="bi bi-list"
-          viewBox="0 0 16 16"
-        >
-          <path
-            fill-rule="evenodd"
-            d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"
-          />
-        </svg>
-      </header>
-      <div id="body">
-        <section class="p-4 pb-0">
-          <h2 class="text-lg font-bold text-gray-800">判決關鍵字：</h2>
-          <!-- TODO: Dynamically render keywords -->
-          <div id="keywords-list" class="py-4 text-gray-800 font-bold">
-            <span class="bg-gray-300 rounded-xl p-2 mr-2 text-md"
-              >債權行為</span
-            >
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="../styles/popup.css" />
+  <script src="../styles/tailwind.js"></script>
+  <script type="module" src="./popup.js"></script>
+  <title>CLaw: popup</title>
+</head>
+
+<body>
+  <div class="container">
+    <header class="text-lg text-white flex bg-indigo-800 p-4 justify-between">
+      <h1 class="font-bold">CLaw</h1>
+      <!-- TODO: Add list functionality -->
+      <svg xmlns="http://www.w3.org/2000/svg" class="text-white w-6 h-6" fill="currentColor" class="bi bi-list"
+        viewBox="0 0 16 16">
+        <path fill-rule="evenodd"
+          d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
+      </svg>
+    </header>
+    <div id="body">
+      <section class="p-4 pb-0">
+        <h2 class="text-lg font-bold text-gray-800">判決關鍵字：</h2>
+        <!-- Dynamically render keywords -->
+        <div id="keywords-list" class="py-4 text-gray-800 font-bold">
+        </div>
+      </section>
+      <section class="p-4 pb-0">
+        <h2 class="text-lg font-bold text-gray-800">相似：</h2>
+        <div class="flex justify-evenly py-4">
+          <!-- Similar verdicts that won -->
+          <div class="flex flex-col items-start">
+            <div
+              class="rounded-full w-8 h-8 text-white bg-indigo-800 text-center font-bold text-lg self-center flex items-center justify-center">
+              勝
+            </div>
+            <!-- Dynamically render similar verdicts that won -->
+            <ul id="similar_judgements_win_list" class="py-4">
+            </ul>
           </div>
-        </section>
-        <section class="p-4 pb-0">
-          <h2 class="text-lg font-bold text-gray-800">相似：</h2>
-          <div class="flex justify-evenly py-4">
-            <!-- Similar verdicts that won -->
-            <div class="flex flex-col items-start">
-              <div
-                class="rounded-full w-8 h-8 text-white bg-indigo-800 text-center font-bold text-lg self-center flex items-center justify-center"
-              >
-                勝
-              </div>
-              <!-- TODO: Dynamically render similar verdicts that won -->
-              <ul id="similar_judgements_win_list" class="py-4">
-                <li class="mb-2">
-                  <a class="underline underline-offset-2" href="/"
-                    >最高法院 108, 台上大, 2470</a
-                  >
-                </li>
-                <li class="mb-2">
-                  <a class="underline underline-offset-2" href="/"
-                    >最高法院 63, 台上, 1235</a
-                  >
-                </li>
-                <li class="mb-2">
-                  <a class="underline underline-offset-2" href="/"
-                    >最高法院 108, 台上大, 2470</a
-                  >
-                </li>
-              </ul>
+          <!-- Divide line -->
+          <div class="w-[1px] h-30 bg-gray-300 rounded-full"></div>
+          <!-- Similar verdicts that loss -->
+          <div class="flex flex-col">
+            <div
+              class="rounded-full w-8 h-8 text-white bg-indigo-800 text-center font-bold text-lg self-center flex items-center justify-center">
+              敗
             </div>
-            <!-- Divide line -->
-            <div class="w-[1px] h-30 bg-gray-300 rounded-full"></div>
-            <!-- Similar verdicts that loss -->
-            <div class="flex flex-col">
-              <div
-                class="rounded-full w-8 h-8 text-white bg-indigo-800 text-center font-bold text-lg self-center flex items-center justify-center"
-              >
-                敗
-              </div>
-              <!-- TODO: Dynamically render similar verdicts that loss -->
-              <ul id="similar_judgements_lose_list" class="py-4">
-                <li class="mb-2">
-                  <a class="underline underline-offset-2" href="/"
-                    >最高法院 108, 台上大, 2470</a
-                  >
-                </li>
-                <li class="mb-2">
-                  <a class="underline underline-offset-2" href="/"
-                    >最高法院 63, 台上, 1235</a
-                  >
-                </li>
-                <li class="mb-2">
-                  <a class="underline underline-offset-2" href="/"
-                    >最高法院 108, 台上大, 2470</a
-                  >
-                </li>
-              </ul>
-            </div>
+            <!-- Dynamically render similar verdicts that loss -->
+            <ul id="similar_judgements_lose_list" class="py-4">
+            </ul>
           </div>
-        </section>
-        <section class="p-4 pb-0">
-          <h2 class="text-lg font-bold text-gray-800">分析：</h2>
-          <div class="flex justify-around p-4">
-            <div>
-              <h1 class="text-4xl font-bold text-indigo-800 text-center">
-                765
-              </h1>
-              <h4 class="text-center py-2">條相似的裁判</h4>
-            </div>
-            <div>
-              <h1 class="text-4xl font-bold text-indigo-800 text-center">
-                75%
-              </h1>
-              <h4 class="text-center py-2">勝率</h4>
-            </div>
+        </div>
+      </section>
+      <section class="p-4 pb-0">
+        <h2 class="text-lg font-bold text-gray-800">分析：</h2>
+        <div class="flex justify-around p-4">
+          <div>
+            <h1 class="text-4xl font-bold text-indigo-800 text-center">
+              47
+            </h1>
+            <h4 class="text-center py-2">條相似的裁判</h4>
           </div>
-        </section>
-      </div>
+          <div>
+            <h1 class="text-4xl font-bold text-indigo-800 text-center">
+              67%
+            </h1>
+            <h4 class="text-center py-2">勝率</h4>
+          </div>
+        </div>
+      </section>
     </div>
-  </body>
+  </div>
+</body>
+
 </html>

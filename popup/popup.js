@@ -1,14 +1,7 @@
+// @ts-nocheck
 import { getActiveTabURL } from "../utils.js";
 
-const keywordClassNames = [
-  "bg-gray-300",
-  "rounded-xl",
-  "p-2",
-  "mr-2",
-  "text-md",
-];
-
-const viewDashboard = () => {
+const viewDashboard = async (currentNo = "", currentKeywords = [], currentSimilarJudgements = [], currentOutcome = []) => {
   const keywordsListElement = document.getElementById("keywords-list");
   if (!keywordsListElement) {
     console.error("keywordsListElement not found");
@@ -16,55 +9,33 @@ const viewDashboard = () => {
   };
   keywordsListElement.innerHTML = "";
 
-  const keywords = [];
-
-  for (const keyword of keywords) {
+  for (const keyword of currentKeywords.slice(0, 10)) {
     const keywordElement = document.createElement("span");
     keywordElement.innerText = keyword;
-    for (const cls of keywordClassNames) {
-      keywordElement.classList.add(cls);
-    }
+    keywordElement.classList.add("bg-gray-300", "rounded-xl", "p-2", "mr-2", "mb-2", "text-md", "inline-block");
     keywordsListElement.appendChild(keywordElement);
   }
 
-  const similarJudgements = [
-    {
-      judgement_id: "108,台上大,2470",
+  // Sample format:
+  //   {
+  //     judgement_id: "110,台上,1877",
+  //     court_level: "最高法院",
+  //     result: "win",
+  //     link: "https://lawsnote.com/judgement/60910dbb38dd6d89045ae8d6?t=1643964315",
+  //   }
+  const similarJudgements = await Promise.all(currentSimilarJudgements.map(async (currentSimilarJudgement) => {
+    const res = await fetch(`http://meow1.csie.ntu.edu.tw:8888/judgement/${currentSimilarJudgement[0]}/outcome`);
+    const data = await res.json();
+    const outcome = data.output === 3 ? "Unknown" : data.output === 2 ? "Partial Win" : data.output === 1 ? "Win" : "Lose";
+
+    return {
+      judgement_id: currentSimilarJudgement[0],
       court_level: "最高法院",
-      result: "win",
-      link: "https://lawsnote.com/judgement/60910dbb38dd6d89045ae8d6?t=1643964315",
-    },
-    {
-      judgement_id: "111,台上,1274",
-      court_level: "最高法院",
-      result: "win",
-      link: "https://lawsnote.com/judgement/62e7e1568b4ccbb5c0b2f005?t=1643964315",
-    },
-    {
-      judgement_id: "111,台上,1805",
-      court_level: "最高法院",
-      result: "win",
-      link: "https://lawsnote.com/judgement/62e8bea78b4ccbb5c0eb2576?t=1643964315",
-    },
-    {
-      judgement_id: "111,台上,1401",
-      court_level: "最高法院",
-      result: "lose",
-      link: "https://lawsnote.com/judgement/62edfa0d8b4ccbb5c073939c?t=1643964315",
-    },
-    {
-      judgement_id: "111,台抗,602",
-      court_level: "最高法院",
-      result: "lose",
-      link: "https://lawsnote.com/judgement/62f1fada8b4ccbb5c0e2fcb6?t=1643964315",
-    },
-    {
-      judgement_id: "111,台上,526",
-      court_level: "最高法院",
-      result: "lose",
-      link: "https://lawsnote.com/judgement/62e23fe98b4ccbb5c0a3b7ae?t=1643964315",
-    },
-  ];
+      result: outcome,
+      link: ""
+    };
+  }));
+  console.log(similarJudgements);
 
   const similarJudgementsWinListElement = document.getElementById(
     "similar_judgements_win_list"
@@ -74,7 +45,7 @@ const viewDashboard = () => {
 
   // Render Winning judgements
   similarJudgements
-    .filter((similarJudgement) => similarJudgement.result === "win")
+    .filter((similarJudgement) => similarJudgement.result === "Win")
     .forEach((similarJudgement) => {
       const listElement = document.createElement("li");
       listElement.className = "mb-2";
@@ -95,7 +66,7 @@ const viewDashboard = () => {
   similarJudgementsLoseListElement.innerHTML = "";
 
   similarJudgements
-    .filter((similarJudgement) => similarJudgement.result === "lose")
+    .filter((similarJudgement) => similarJudgement.result === "Lose")
     .forEach((similarJudgement) => {
       const listElement = document.createElement("li");
       listElement.className = "mb-2";
@@ -112,8 +83,19 @@ const viewDashboard = () => {
 document.addEventListener("DOMContentLoaded", async () => {
   const activeTab = await getActiveTabURL();
   if (activeTab.url && activeTab.url.includes("lawsnote.com/judgement")) {
-    console.log("viewing dashboard");
-    viewDashboard();
+    // @ts-ignore
+    chrome.storage.sync.get(["currentNo"], (data) => {
+      const _currentNo = data.currentNo;
+      chrome.storage.sync.get([_currentNo], async (data) => {
+        const res = data[_currentNo] ? JSON.parse(data[_currentNo]) : {};
+        console.log(res);
+        console.log("viewing dashboard");
+        if (res.status === "Success") {
+          await viewDashboard(_currentNo, res.output.keywords.keywords, res.output.similar_judgements, res.output.outcome);
+        }
+      })
+    })
+
   } else {
     const container = document.getElementById("body");
     // @ts-ignore

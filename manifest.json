@@ -1,7 +1,7 @@
 {
   // Comments are accepted in the manifest, even though it is JSON.
   "manifest_version": 3,
-  "name": "LawsnotePlus",
+  "name": "CLaw",
   "description": "🚀 A chrome extension for Lawsnote that can help you analyze verdicts. 🚀",
   "version": "0.0.1",
   "icons": {
@@ -11,10 +11,10 @@
   },
   "options_page": "settings/settings.html",
   "action": {
-    "default_title": "LawsnotePlus",
+    "default_title": "CLaw",
     "default_popup": "popup/popup.html"
   },
-  "permissions": [],
+  "permissions": ["storage", "tabs"],
   "host_permissions": ["*://*/*"],
   "background": {
     "service_worker": "service-worker.js"
