@@ -10,18 +10,22 @@ const keywordClassNames = [
 
 const viewDashboard = () => {
   const keywordsListElement = document.getElementById("keywords-list");
+  if (!keywordsListElement) {
+    console.error("keywordsListElement not found");
+    return;
+  };
   keywordsListElement.innerHTML = "";
 
-  const keywords = ["債權行為", "物權行為", "所有權"];
+  const keywords = [];
 
-  keywords.forEach((keyword) => {
+  for (const keyword of keywords) {
     const keywordElement = document.createElement("span");
     keywordElement.innerText = keyword;
     for (const cls of keywordClassNames) {
       keywordElement.classList.add(cls);
     }
     keywordsListElement.appendChild(keywordElement);
-  });
+  }
 
   const similarJudgements = [
     {
@@ -65,8 +69,10 @@ const viewDashboard = () => {
   const similarJudgementsWinListElement = document.getElementById(
     "similar_judgements_win_list"
   );
+  // @ts-ignore
   similarJudgementsWinListElement.innerHTML = "";
 
+  // Render Winning judgements
   similarJudgements
     .filter((similarJudgement) => similarJudgement.result === "win")
     .forEach((similarJudgement) => {
@@ -77,12 +83,15 @@ const viewDashboard = () => {
       similarJudgementElement.href = similarJudgement.link;
       similarJudgementElement.innerText = `${similarJudgement.court_level} ${similarJudgement.judgement_id}`;
       listElement.appendChild(similarJudgementElement);
+      // @ts-ignore
       similarJudgementsWinListElement.appendChild(listElement);
     });
 
+  // Render losing judgements
   const similarJudgementsLoseListElement = document.getElementById(
     "similar_judgements_lose_list"
   );
+  // @ts-ignore
   similarJudgementsLoseListElement.innerHTML = "";
 
   similarJudgements
@@ -95,6 +104,7 @@ const viewDashboard = () => {
       similarJudgementElement.href = similarJudgement.link;
       similarJudgementElement.innerText = `${similarJudgement.court_level} ${similarJudgement.judgement_id}`;
       listElement.appendChild(similarJudgementElement);
+      // @ts-ignore
       similarJudgementsLoseListElement.appendChild(listElement);
     });
 };
@@ -106,6 +116,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     viewDashboard();
   } else {
     const container = document.getElementById("body");
+    // @ts-ignore
     container.innerHTML =
       '<div class="text-lg text-center text-bold p-6">This is not a Lawsnote judgement page.</div>';
   }

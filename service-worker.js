@@ -10,3 +10,15 @@ importScripts('service-worker-utils.js')
 // If you want to import a file that is deeper in the file hierarchy of your
 // extension, simply do `importScripts('path/to/file.js')`.
 // The path should be relative to the file `manifest.json`.
+
+// @ts-ignore
+chrome.tabs.onUpdated.addListener((tabId, tab) => {
+  if (tab.url && tab.url.includes("lawsnote.com/judgement")) {
+    // @ts-ignore
+    chrome.tabs.sendMessage(tabId, {
+      type: "NEW",
+    });
+  }
+})
+
+
