@@ -24,7 +24,6 @@
 
         const res = await fetch(`${hostName}/judgement/${currentNo}`);
         const data = await res.json();
-        console.log("judgement info: ", data);
 
         currentKeywords = data.output.keywords.keywords;
         currentSimilarJudgements = data.output.similar_judgements;
@@ -32,17 +31,26 @@
           : data.output.outcome === 2 ? "Partial Win"
             : data.output.outcome === 1 ? "Win" : "Lose";
 
-        console.log("current keywords: ", currentKeywords);
-        console.log("current similar judgements: ", currentSimilarJudgements);
-        console.log("current outcome: ", currentOutcome);
+        const winningSimilarJudgements = currentSimilarJudgements.filter((similarJudgement) => similarJudgement[2] === 1);
+        const partialWinSimilarJudgements = currentSimilarJudgements.filter((similarJudgement) => similarJudgement[2] === 2);
+        const losingSimilarJudgements = currentSimilarJudgements.filter((similarJudgement) => similarJudgement[2] === 0);
+        const winningPercentage = (winningSimilarJudgements.length + partialWinSimilarJudgements.length) / currentSimilarJudgements.length;
 
+        const output = {
+          keywords: currentKeywords,
+          winningSimilarJudgements: winningSimilarJudgements.slice(0, 3),
+          losingSimilarJudgements: losingSimilarJudgements.slice(0, 3),
+          similarJudgementCount: currentSimilarJudgements.length,
+          winningPercentage: winningPercentage,
+          outcome: currentOutcome
+        };
         // @ts-ignore
         chrome.storage.sync.set({
           ["currentNo"]: currentNo,
         })
         // @ts-ignore
         chrome.storage.sync.set({
-          [currentNo]: JSON.stringify(data)
+          [currentNo]: JSON.stringify(output)
         });
       }
     };

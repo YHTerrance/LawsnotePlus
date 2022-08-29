@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { getActiveTabURL } from "../utils.js";
 
-const viewDashboard = async (currentNo = "", currentKeywords = [], currentSimilarJudgements = [], currentOutcome = []) => {
+const renderKeywords = (keywords) => {
   const keywordsListElement = document.getElementById("keywords-list");
   if (!keywordsListElement) {
     console.error("keywordsListElement not found");
@@ -9,12 +9,63 @@ const viewDashboard = async (currentNo = "", currentKeywords = [], currentSimila
   };
   keywordsListElement.innerHTML = "";
 
-  for (const keyword of currentKeywords.slice(0, 10)) {
+  for (const keyword of keywords.slice(0, 10)) {
     const keywordElement = document.createElement("span");
     keywordElement.innerText = keyword;
     keywordElement.classList.add("bg-gray-300", "rounded-xl", "p-2", "mr-2", "mb-2", "text-md", "inline-block");
     keywordsListElement.appendChild(keywordElement);
   }
+}
+
+const createSimilarJudgementsElements = (similarJudgements, topK = 3) => {
+  const elements = [];
+  for (const similarJudgement of similarJudgements.slice(0, topK)) {
+    const listElement = document.createElement("li");
+    listElement.className = "mb-2";
+    const similarJudgementElement = document.createElement("a");
+    similarJudgementElement.classList.add("underline", "underline-offset-2");
+    similarJudgementElement.href = similarJudgement.link;
+    similarJudgementElement.innerText = `${similarJudgement.court_level} ${similarJudgement.judgement_id}`;
+    listElement.appendChild(similarJudgementElement);
+    elements.push(listElement);
+  }
+  return elements;
+}
+
+const renderSimilarJudgements = (similarJudgements) => {
+
+  // Render Winning judgements
+  const similarJudgementsWinListElement = document.getElementById(
+    "similar_judgements_win_list"
+  );
+  // @ts-ignore
+  similarJudgementsWinListElement.innerHTML = "";
+  const winJudgements = similarJudgements
+    .filter((similarJudgement) => similarJudgement.result === "Win")
+    .sort((a, b) => b.similarity - a.similarity);
+  const winJudgementsElements = createSimilarJudgementsElements(winJudgements);
+  for (const e of winJudgementsElements) {
+    similarJudgementsWinListElement.appendChild(e);
+  }
+
+  // Render losing judgements
+  const similarJudgementsLoseListElement = document.getElementById(
+    "similar_judgements_lose_list"
+  );
+  // @ts-ignore
+  similarJudgementsLoseListElement.innerHTML = "";
+  const loseJudgements = similarJudgements
+    .filter((similarJudgement) => similarJudgement.result === "Lose")
+    .sort((a, b) => b.similarity - a.similarity);
+  const loseJudgementsElements = createSimilarJudgementsElements(loseJudgements);
+  for (const e of loseJudgementsElements) {
+    similarJudgementsLoseListElement.appendChild(e);
+  }
+}
+
+const viewDashboard = async (no = "", keywords = [], winningSimilarJudgements = [], losingSimilarJudgements = [], winningPercentage = 0, outcome = "", similarJudgementCount = 0) => {
+
+  renderKeywords(keywords);
 
   // Sample format:
   //   {
@@ -23,61 +74,24 @@ const viewDashboard = async (currentNo = "", currentKeywords = [], currentSimila
   //     result: "win",
   //     link: "https://lawsnote.com/judgement/60910dbb38dd6d89045ae8d6?t=1643964315",
   //   }
-  const similarJudgements = await Promise.all(currentSimilarJudgements.map(async (currentSimilarJudgement) => {
-    const res = await fetch(`http://meow1.csie.ntu.edu.tw:8888/judgement/${currentSimilarJudgement[0]}/outcome`);
-    const data = await res.json();
-    const outcome = data.output === 3 ? "Unknown" : data.output === 2 ? "Partial Win" : data.output === 1 ? "Win" : "Lose";
-
+  const similarJudgements = [...winningSimilarJudgements, ...losingSimilarJudgements].map((data) => {
+    const outcome = data[2] === 3 ? "Unknown" : data[2] === 2 ? "Partial Win" : data[2] === 1 ? "Win" : "Lose";
     return {
-      judgement_id: currentSimilarJudgement[0],
+      judgement_id: data[0],
+      similarity: data[1],
       court_level: "最高法院",
       result: outcome,
       link: ""
     };
-  }));
+  });
   console.log(similarJudgements);
 
-  const similarJudgementsWinListElement = document.getElementById(
-    "similar_judgements_win_list"
-  );
-  // @ts-ignore
-  similarJudgementsWinListElement.innerHTML = "";
+  renderSimilarJudgements(similarJudgements);
 
-  // Render Winning judgements
-  similarJudgements
-    .filter((similarJudgement) => similarJudgement.result === "Win")
-    .forEach((similarJudgement) => {
-      const listElement = document.createElement("li");
-      listElement.className = "mb-2";
-      const similarJudgementElement = document.createElement("a");
-      similarJudgementElement.classList.add("underline", "underline-offset-2");
-      similarJudgementElement.href = similarJudgement.link;
-      similarJudgementElement.innerText = `${similarJudgement.court_level} ${similarJudgement.judgement_id}`;
-      listElement.appendChild(similarJudgementElement);
-      // @ts-ignore
-      similarJudgementsWinListElement.appendChild(listElement);
-    });
-
-  // Render losing judgements
-  const similarJudgementsLoseListElement = document.getElementById(
-    "similar_judgements_lose_list"
-  );
-  // @ts-ignore
-  similarJudgementsLoseListElement.innerHTML = "";
-
-  similarJudgements
-    .filter((similarJudgement) => similarJudgement.result === "Lose")
-    .forEach((similarJudgement) => {
-      const listElement = document.createElement("li");
-      listElement.className = "mb-2";
-      const similarJudgementElement = document.createElement("a");
-      similarJudgementElement.classList.add("underline", "underline-offset-2");
-      similarJudgementElement.href = similarJudgement.link;
-      similarJudgementElement.innerText = `${similarJudgement.court_level} ${similarJudgement.judgement_id}`;
-      listElement.appendChild(similarJudgementElement);
-      // @ts-ignore
-      similarJudgementsLoseListElement.appendChild(listElement);
-    });
+  const similarJudgementCountElement = document.getElementById("similar_judgement_count");
+  similarJudgementCountElement.innerText = similarJudgementCount;
+  const winningPercentageElement = document.getElementById("winning_percentage");
+  winningPercentageElement.innerText = `${Math.round(winningPercentage * 100 * 100) / 100}%`;
 };
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -90,9 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         const res = data[_currentNo] ? JSON.parse(data[_currentNo]) : {};
         console.log(res);
         console.log("viewing dashboard");
-        if (res.status === "Success") {
-          await viewDashboard(_currentNo, res.output.keywords.keywords, res.output.similar_judgements, res.output.outcome);
-        }
+        await viewDashboard(_currentNo, res.keywords, res.winningSimilarJudgements, res.losingSimilarJudgements, res.winningPercentage, res.outcome, res.similarJudgementCount);
       })
     })
 
